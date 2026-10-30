@@ -107,7 +107,7 @@ function modal(title,fields,onSave,onDel){
  if(onDel)$("mDel").onclick=()=>{onDel();$("mbg").classList.remove("on");saveP();render()};
  $("mOk").onclick=async()=>{const v={};for(const f of fields){const el=$("f_"+f.k);v[f.k]=f.t=="file"?(el.files[0]?await shrink(el.files[0]):null):el.value.trim()}if(await onSave(v)===false)return;$("mbg").classList.remove("on");saveP();render()};
 }
-function shrink(file){return new Promise(r=>{const img=new Image();img.onload=()=>{const s=Math.min(1,240/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;c.getContext("2d").drawImage(img,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.7))};img.src=URL.createObjectURL(file)})}
+function shrink(file){return new Promise(r=>{const img=new Image();img.onload=()=>{const s=Math.min(1,1000/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;c.getContext("2d").drawImage(img,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.9))};img.src=URL.createObjectURL(file)})}
 function profileForm(first){
  modal(first?"Create your character":"Edit profile",[{k:"name",l:"Character name",v:P.name},{k:"level",l:"Title / Level",v:P.level,p:"e.g. Level 40"},{k:"sub",l:"Subtitle",v:P.sub,p:"e.g. Veteran | Horseman"},{k:"photo",l:"Photo (optional)",t:"file"}],v=>{if(!v.name){alert("Please enter a name.");return false}P.name=v.name;P.level=v.level;P.sub=v.sub;if(v.photo)P.photo=v.photo});
  if(first)$("mCancel").style.display="none";
