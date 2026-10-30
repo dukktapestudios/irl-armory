@@ -160,7 +160,7 @@ $("makeOwn").onclick=()=>{location.href=location.href.split("#")[0]};
  if(!el)return;
  let seen=true;
  try{seen=localStorage.getItem(k)==="1"}catch(e){}
- fetch("https://tally.yuki.sh/hits/br0wnb3ar-dev.github.io/foreverirl.json"+(seen?"?mode=read":""))
+ fetch("https://tally.yuki.sh/hits/dukktapestudios.github.io/irl-armory.json"+(seen?"?mode=read":""))
   .then(r=>r.ok?r.json():Promise.reject())
   .then(d=>{if(!seen)try{localStorage.setItem(k,"1")}catch(e){}if(Number.isFinite(d.visit))el.textContent=String(d.visit)})
   .catch(()=>{});
