@@ -117,8 +117,8 @@ function mountItem(d,g,label,set){
  const sub=label||"Inventory";
  d.className="slot "+(g?"r-"+g.rar:"empty");
  d.innerHTML=g?(safeUrl(g.icon)?`<img src="${esc(g.icon)}">`:esc(g.icon||"❔")):(label?(RO?esc(label):"+ Add item"):(RO?"":"+ Add item"));
- d.onmouseenter=()=>{if(!g&&RO)return;const t=$("tip");t.innerHTML=g?`<b class="c-${g.rar}">${esc(g.name)}</b><div class="s">${esc(sub)}</div>${g.desc?`<div class="f">"${esc(g.desc)}"</div>`:""}${safeUrl(g.link)?`<div style="margin-top:6px"><a href="${esc(buyLink(g.link))}" target="_blank" rel="noopener noreferrer">🛒 Buy it here</a></div>`:""}`:`<div class="s">${esc(sub)} — empty</div>`;t.style.display="block";const r=d.getBoundingClientRect();t.style.left=Math.min(r.right+6,innerWidth-270)+"px";t.style.top=r.top+"px"};
- d.onmouseleave=()=>setTimeout(()=>{if(!$("tip").matches(":hover"))$("tip").style.display="none"},250);
+ d.onmouseenter=()=>{clearTimeout(window._tipT);if(!g&&RO)return;const t=$("tip");t.innerHTML=g?`<b class="c-${g.rar}">${esc(g.name)}</b><div class="s">${esc(sub)}</div>${g.desc?`<div class="f">"${esc(g.desc)}"</div>`:""}${safeUrl(g.link)?`<div style="margin-top:6px"><a href="${esc(buyLink(g.link))}" target="_blank" rel="noopener noreferrer">🛒 Buy it here</a></div>`:""}`:`<div class="s">${esc(sub)} — empty</div>`;t.style.display="block";const r=d.getBoundingClientRect();t.style.left=Math.min(r.right-4,innerWidth-270)+"px";t.style.top=Math.max(4,Math.min(r.top,innerHeight-t.offsetHeight-4))+"px"};
+ d.onmouseleave=()=>{clearTimeout(window._tipT);window._tipT=setTimeout(()=>{$("tip").style.display="none"},600)};
  d.onclick=()=>{if(RO){if(g&&safeUrl(g.link))window.open(buyLink(g.link),"_blank","noopener");return}
   modal((g?"Edit ":"Add ")+(label||"inventory")+" item",[{k:"name",l:"Item name",v:g?.name},{k:"icon",l:"Icon (pick an emoji or paste an image URL)",v:g?.icon,emoji:1},{k:"rar",l:"Rarity color",t:"select",o:RAR,v:g?.rar||"rare"},{k:"desc",l:"Short description",v:g?.desc},{k:"link",l:"Buy link (URL)",v:g?.link,p:"https://..."}],v=>{if(!v.name){alert("Please enter an item name.");return false}if(v.link&&!safeUrl(v.link)){alert("Buy link must start with http:// or https://");return false}set(v)},g?()=>set(null):null)};
 }
@@ -131,7 +131,7 @@ function render(){
  if(!Array.isArray(P.inv))P.inv=[];while(P.inv.length<INV)P.inv.push(null);
  const inv=$("inv");inv.innerHTML="";
  for(let i=0;i<INV;i++){const d=document.createElement("div");mountItem(d,P.inv[i],"",v=>P.inv[i]=v);inv.appendChild(d)}
- $("tip").onmouseleave=()=>$("tip").style.display="none";
+ $("tip").onmouseenter=()=>clearTimeout(window._tipT);$("tip").onmouseleave=()=>{window._tipT=setTimeout(()=>{$("tip").style.display="none"},300)};
  const list=(id,key,fmt,fields)=>{$(id).innerHTML=P[key].map((x,i)=>fmt(x,i)).join("");$(id).querySelectorAll("[data-i]").forEach(el=>{if(RO)return;el.style.cursor="pointer";el.onclick=()=>{const i=+el.dataset.i;modal("Edit",fields(P[key][i]),v=>{P[key][i]=v},()=>P[key].splice(i,1))}})};
  const kv=(x,i)=>`<div class="row" data-i="${i}"><span>${esc(x.k)}</span><span>${esc(x.v)}</span></div>`;
  list("stats","stats",kv,x=>[{k:"k",l:"Stat name",v:x?.k},{k:"v",l:"Value",v:x?.v}]);
