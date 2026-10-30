@@ -148,10 +148,21 @@ const b64u=b=>btoa(String.fromCharCode(...b)).replace(/\+/g,"-").replace(/\//g,"
 const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
 async function pack(o){const s=new Blob([JSON.stringify(o)]).stream().pipeThrough(new CompressionStream("deflate-raw"));const b=new Uint8Array(await new Response(s).arrayBuffer());let out="";for(let i=0;i<b.length;i+=8192)out+=String.fromCharCode(...b.subarray(i,i+8192));return btoa(out).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 async function unpack(h){const s=new Blob([unb64u(h)]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return JSON.parse(await new Response(s).text())}
-$("shareBtn").onclick=async()=>{const url=location.href.split("#")[0]+"#p="+await pack(P);try{await navigator.clipboard.writeText(url);alert("Link copied! ("+url.length+" characters)")}catch(e){prompt("Copy your link:",url)}};
+const BIN="https://extendsclass.com/api/json-storage/bin";
+function reshrink(u,m,q){return new Promise(r=>{const img=new Image();img.onload=()=>{const s=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;c.getContext("2d").drawImage(img,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",q))};img.onerror=()=>r(u);img.src=u})}
+$("shareBtn").onclick=async()=>{const b=$("shareBtn"),t=b.textContent;b.textContent="Making link...";let url;
+ try{let o=Object.assign({},P),body=JSON.stringify(o);
+  for(const [m,q] of [[700,.85],[600,.8],[500,.75],[400,.7],[300,.6],[200,.5]]){if(body.length<=95000||!o.photo)break;o.photo=await reshrink(P.photo,m,q);body=JSON.stringify(o)}
+  if(body.length>95000)throw 0;
+  const r=await fetch(BIN,{method:"POST",body});const j=await r.json();if(!j.id)throw 0;
+  url=location.href.split("#")[0]+"#s="+j.id}
+ catch(e){url=location.href.split("#")[0]+"#p="+await pack(P)}
+ b.textContent=t;try{await navigator.clipboard.writeText(url);alert("Link copied!\n"+url.slice(0,120))}catch(e){prompt("Copy your link:",url)}};
 $("editProf").onclick=()=>profileForm(false);
 $("makeOwn").onclick=()=>{location.href=location.href.split("#")[0]};
-(async()=>{const m=location.hash.match(/^#p=(.+)$/);
+(async()=>{const sm=location.hash.match(/^#s=([A-Za-z0-9]+)$/);
+ if(sm){try{const r=await fetch(BIN+"/"+sm[1]);if(!r.ok)throw 0;P=Object.assign(blank(),await r.json());RO=true;render();return}catch(e){alert("This share link is broken or expired.")}}
+ const m=location.hash.match(/^#p=(.+)$/);
  if(m){try{P=Object.assign(blank(),await unpack(m[1]));RO=true;render();return}catch(e){alert("This share link is broken or incomplete.")}}
  try{P=JSON.parse(localStorage.getItem(KEY))}catch(e){}
  if(P){P=Object.assign(blank(),P);render()}else{P=blank();profileForm(true)}})();
